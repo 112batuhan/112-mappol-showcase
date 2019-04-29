@@ -1,14 +1,15 @@
 import tkinter as tk
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageDraw, ImageOps
+import math
 import numpy as np
 from transforms import RGBTransform
 
-from beatmaps import get_pool, beatmap
+from beatmaps import get_pool, Beatmap
 
 
-class button:
+class Button:
 
-    def __init__(self, window, map, mod, location=(0,0), width=900):
+    def __init__(self, window, map, mod, location=(0,0), width=900, mask=None):
         
         self.window = window
 
@@ -23,12 +24,15 @@ class button:
         self.ratio = self.image_size / self.image.size[0]
 
         self.image = self.resize_image(self.image)
+
+        self.image.paste(mask, mask=mask)
+
         self.show_image = ImageTk.PhotoImage(self.image)
 
         self.state = 0
 
-        self.button = tk.Button ( self.window, bd = 0, image=self.show_image, command=self.change_color) 
-        self.button.grid(row = self.location[0], column = self.location[1])
+        self.clickable = tk.Button (self.window, bd = 0, image=self.show_image, command=self.change_color)
+        self.clickable.grid(row = self.location[0], column = self.location[1])
 
     def resize_image(self, image):
         
@@ -66,11 +70,11 @@ class button:
 
         self.show_image = ImageTk.PhotoImage(temp_image)
 
-        self.button.configure(image=self.show_image)
-        self.button.image = self.show_image
+        self.clickable.configure(image=self.show_image)
+        self.clickable.image = self.show_image
     
 
-class window:
+class Window:
 
     def __init__(self, window_size=(1420, 530) ):
 
@@ -96,36 +100,40 @@ class window:
                 rows.append( [mod,maps] )
 
 
-            
-        
-        
-        
+def rounded_rectangle(draw, xy, rad, fill=None):
+    x0, y0, x1, y1 = xy
+    draw.rectangle([ (x0, y0 + rad), (x1, y1 - rad) ], fill=fill)
+    draw.rectangle([ (x0 + rad, y0), (x1 - rad, y1) ], fill=fill)
+    draw.pieslice([ (x0, y0), (x0 + rad * 2, y0 + rad * 2) ], 180, 270, fill=fill)
+    draw.pieslice([ (x1 - rad * 2, y1 - rad * 2), (x1, y1) ], 0, 90, fill=fill)
+    draw.pieslice([ (x0, y1 - rad * 2), (x0 + rad * 2, y1) ], 90, 180, fill=fill)
+    draw.pieslice([ (x1 - rad * 2, y0), (x1, y0 + rad * 2) ], 270, 360, fill=fill)
 
-'''
-
-shit = window()
-
-shit.parse_buttons()
-
-
-'''
 
 top = tk.Tk()
 
 top.geometry("1420x530")
 
-my_map = beatmap("176960")
-
-my_button = button(top, my_map, "nm",(0,0) ,400)
-my_button2 = button(top, my_map, "nm",(1,0) , 400)
-my_button3 = button(top, my_map, "nm",(2,0) , 400)
-my_button4 = button(top, my_map, "nm",(3,0) , 400)
-my_button5 = button(top, my_map, "nm",(4,0) , 400)
-my_button6 = button(top, my_map, "nm",(5,0) , 400)
-my_button7 = button(top, my_map, "nm",(0,1) , 400)
-my_button8 = button(top, my_map, "nm",(0,2) , 400)
+cover_size = 400
 
 
+# Rounded Rectangular Mask
+mask = Image.new('L', (cover_size, cover_size*250//900), 0)
+draw = ImageDraw.Draw(mask)
+rounded_rectangle(draw, (0, 0, cover_size, cover_size*250//900), rad=40, fill=255)
+mask = ImageOps.invert(mask)
+#mask.show()
+
+# Map ids, in an array
+maps = ["176960", "2002882", "1996791", "2004799", "1994939", "2005243",
+        "1950850", "1917673", "1555061", "1997180", "2006468"]
+
+# Map objects as beatmap class
+my_map = [Beatmap(idx) for idx in maps]
+
+# For all beatmaps, create a button
+for buttonNo in range(len(maps)):
+    Button(top, my_map[buttonNo], "nm", (buttonNo % 5, math.floor(buttonNo / 5)), cover_size, mask=mask)
 
 top.mainloop()
 
