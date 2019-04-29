@@ -2,7 +2,7 @@ import requests, json
 import urllib.request
 from pathlib import Path
 
-class beatmap:
+class Beatmap:
 
     def __init__(self, id):
 
