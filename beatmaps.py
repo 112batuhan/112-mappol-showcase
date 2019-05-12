@@ -11,7 +11,7 @@ class Beatmap:
         folder_dir = Path("backgrounds")
         folder_dir.mkdir(exist_ok=True)
 
-        api = "API HERE"
+        api = "PUT API HERE"
         url = f"https://osu.ppy.sh/api/get_beatmaps?k={api}&b={self.id}"
         
         r = requests.get(url)
@@ -25,8 +25,10 @@ class Beatmap:
 
         url = f"https://assets.ppy.sh/beatmaps/{self.set_id}/covers/cover.jpg"
         self.image_path = f"{folder_dir}/{self.id}.jpg"
-
-        urllib.request.urlretrieve(url, self.image_path)    
+        
+        if not Path(self.image_path).exists():
+            urllib.request.urlretrieve(url, self.image_path)    
+            print(f"Downloading image {self.id}")
 
 
 

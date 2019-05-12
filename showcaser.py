@@ -30,7 +30,7 @@ class Button:
 
         self.mod_image = self.load_mod()
         self.mod_image = self.resize_image(self.mod_image, width//2)
-        self.paste_mod(self.image)
+        self.add_mod(self.image)
 
         self.show_image = ImageTk.PhotoImage(self.image)
 
@@ -91,7 +91,7 @@ class Button:
         return Image.open(str(folder_dir / image_name) + ".png")
     
 
-    def paste_mod(self, image):
+    def add_mod(self, image):
         
         x = (self.width - self.mod_image.size[0]) // 12 
         y = (self.height - self.mod_image.size[1]) // 2
@@ -122,7 +122,7 @@ class Button:
             self.state = 0 
 
         self.add_mask(temp_image)
-        self.paste_mod(temp_image)
+        self.add_mod(temp_image)
         self.show_image = ImageTk.PhotoImage(temp_image)
 
         self.clickable.configure(image=self.show_image)
@@ -164,9 +164,7 @@ top.configure(bg="white")
 cover_size = 350
 
 
-# Map ids, in an array
 buttonNo = 0
-map_list = []
 for mod,maps in get_pool().items():
 
     for map in maps:
