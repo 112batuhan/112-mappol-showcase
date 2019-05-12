@@ -1,5 +1,5 @@
 import tkinter as tk
-from PIL import ImageTk, Image, ImageDraw, ImageOps
+from PIL import ImageTk, Image, ImageDraw, ImageOps, ImageFilter
 import math
 import numpy as np
 from transforms import RGBTransform
@@ -26,6 +26,7 @@ class Button:
 
         self.image = self.resize_image(self.image, self.width)
         self.add_mask(self.image)
+        self.blur_edges(self.image)
         self.show_image = ImageTk.PhotoImage(self.image)
 
         self.mod_image = self.load_mod()
@@ -65,9 +66,18 @@ class Button:
         # Rounded Rectangular Mask
         self.mask = Image.new('L', (self.width, self.height), 0)
         self.draw = ImageDraw.Draw(self.mask)
-        self.rounded_rectangle(self.draw, (0, 0, self.width, self.height), rad=40, fill=255)
+        self.rounded_rectangle(self.draw, (4, 4, self.width-4, self.height-4), rad=40, fill=255)
         self.mask = ImageOps.invert(self.mask)
         image.paste(self.mask, mask=self.mask)
+
+    def blur_edges(self, image):
+
+        self.mask = Image.new('L', (self.width, self.height), 0)
+        self.draw = ImageDraw.Draw(self.mask)
+        self.rounded_rectangle(self.draw, (7, 7, self.width-7, self.height-7), rad=40, fill=255)
+        self.mask = ImageOps.invert(self.mask)
+        image2 = image.filter(ImageFilter.GaussianBlur(radius=2))
+        image.paste(image2, mask=self.mask)
 
     def load_mod(self):
 
