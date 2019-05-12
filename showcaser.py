@@ -128,6 +128,7 @@ class Button:
             self.state = 0
 
         self.add_mask(temp_image)
+        self.blur_edges(temp_image)
         self.add_mod(temp_image)
         self.show_image = ImageTk.PhotoImage(temp_image)
 
@@ -165,7 +166,7 @@ top = tk.Tk()
 
 top.geometry("1420x530")
 top.configure(bg="white")
-cover_size = 350
+cover_size = 300
 
 buttonNo = 0
 for mod, maps in get_pool().items():
