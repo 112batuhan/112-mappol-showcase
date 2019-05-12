@@ -161,7 +161,7 @@ class RGBTransform(object):
         elif channel_count > 3:
             color, extra_channels = color[:3], color[3:]
 
-        color_vector = np.array(color + (1, )).reshape(4, 1)
+        color_vector = np.array(color + (1,)).reshape(4, 1)
         result_vector = np.dot(self._matrix, color_vector)
         result = result_vector.flatten()[:3]
 
@@ -182,7 +182,7 @@ def _embed44(matrix):
 def _to_rgb(thing, name="input"):
     """Convert an array-like object to a 1-by-3 numpy array, or fail."""
     thing = np.array(thing)
-    assert thing.shape == (3, ), (
-        "Expected %r to be a length-3 array-like object, but found shape %s" %
+    assert thing.shape == (3,), (
+            "Expected %r to be a length-3 array-like object, but found shape %s" %
             (name, thing.shape))
     return thing
