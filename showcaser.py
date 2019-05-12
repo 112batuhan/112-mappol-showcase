@@ -3,6 +3,7 @@ from PIL import ImageTk, Image, ImageDraw, ImageOps
 import math
 import numpy as np
 from transforms import RGBTransform
+from pathlib import Path
 
 from beatmaps import get_pool, Beatmap
 
@@ -17,12 +18,20 @@ class Button:
         self.mod = mod
 
         self.location = location
-        self.image_size = width
 
         self.image = Image.open(self.map.image_path)
-    
-        self.image = self.resize_image(self.image, width)
+
+        self.width = width
+        self.height = int(self.image.size[1] * width / self.image.size[0])
+
+        self.image = self.resize_image(self.image, self.width)
         self.add_mask(self.image)
+        self.show_image = ImageTk.PhotoImage(self.image)
+
+        self.mod_image = self.load_mod()
+        self.mod_image = self.resize_image(self.mod_image, width//2)
+        self.paste_mod(self.image)
+
         self.show_image = ImageTk.PhotoImage(self.image)
 
         self.state = 0
@@ -34,10 +43,10 @@ class Button:
         
         ratio = width / self.image.size[0]
         
-        self.width = int(ratio * image.size[0])
-        self.height = int(ratio * image.size[1])
+        width = int(ratio * image.size[0])
+        height = int(ratio * image.size[1])
 
-        image = image.resize((self.width, self.height), Image.ANTIALIAS)
+        image = image.resize((width, height), Image.ANTIALIAS)
         return image
     
      
@@ -62,10 +71,33 @@ class Button:
         image.paste(self.mask, mask=self.mask)
 
     
+    def load_mod(self):
+        
+        folder_dir = Path("mods")
 
-    def put_info(self, image):
+        if self.mod == "No Mod":
+            image_name = "selection-mod-Nomod@2x"
+        elif self.mod == "Hidden":
+            image_name = "selection-mod-hidden@2x"
+        elif self.mod == "Hard Rock":
+            image_name = "selection-mod-hardrock@2x"
+        elif self.mod == "Double Time":
+            image_name = "selection-mod-doubletime@2x"
+        elif self.mod == "Free Mod":
+            image_name = "selection-mode-Freemod@2x"
+        elif self.mod == "Tie Breaker":
+            image_name = "selection-mode-Tiebreaker@2x"
 
-        pass
+        return Image.open(str(folder_dir / image_name) + ".png")
+    
+
+    def paste_mod(self, image):
+        
+        x = (self.width - self.mod_image.size[0]) // 12 
+        y = (self.height - self.mod_image.size[1]) // 2
+
+        image.paste(self.mod_image, (x,y), mask = self.mod_image)
+
 
     def change_color(self):
 
@@ -90,6 +122,7 @@ class Button:
             self.state = 0 
 
         self.add_mask(temp_image)
+        self.paste_mod(temp_image)
         self.show_image = ImageTk.PhotoImage(temp_image)
 
         self.clickable.configure(image=self.show_image)
@@ -128,19 +161,21 @@ top = tk.Tk()
 
 top.geometry("1420x530")
 top.configure(bg="white")
-cover_size = 400
+cover_size = 350
 
 
 # Map ids, in an array
-maps = ["176960", "2002882", "1996791", "2004799", "1994939", "2005243",
-        "1950850", "1917673", "1555061", "1997180", "2006468"]
+buttonNo = 0
+map_list = []
+for mod,maps in get_pool().items():
 
-# Map objects as beatmap class
-my_map = [Beatmap(idx) for idx in maps]
+    for map in maps:
+        
+        map = Beatmap(map)
 
-# For all beatmaps, create a button
-for buttonNo in range(len(maps)):
-    Button(top, my_map[buttonNo], "nm", (buttonNo % 5, math.floor(buttonNo / 5)), cover_size)
+        Button(top, map, mod, (buttonNo % 5, math.floor(buttonNo / 5)), cover_size)
+        buttonNo += 1
+
 
 top.mainloop()
 
