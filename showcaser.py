@@ -1,5 +1,5 @@
 import tkinter as tk
-from PIL import ImageTk, Image, ImageDraw, ImageOps, ImageFilter
+from PIL import ImageTk, Image, ImageDraw, ImageOps, ImageFilter, ImageFont
 import math
 import numpy as np
 from transforms import RGBTransform
@@ -20,6 +20,7 @@ class Button:
         self.location = location
 
         self.image = Image.open(self.map.image_path)
+        self.font = ImageFont.truetype("arial.ttf", size = 15)
 
         self.width = width
         self.height = int(self.image.size[1] * width / self.image.size[0])
@@ -30,8 +31,9 @@ class Button:
         self.show_image = ImageTk.PhotoImage(self.image)
 
         self.mod_image = self.load_mod()
-        self.mod_image = self.resize_image(self.mod_image, width // 2)
+        self.mod_image = self.resize_image(self.mod_image, width//3)
         self.add_mod(self.image)
+        self.add_text(self.image)
 
         self.show_image = ImageTk.PhotoImage(self.image)
 
@@ -64,20 +66,42 @@ class Button:
     def add_mask(self, image):
 
         # Rounded Rectangular Mask
-        self.mask = Image.new('L', (self.width, self.height), 0)
-        self.draw = ImageDraw.Draw(self.mask)
-        self.rounded_rectangle(self.draw, (4, 4, self.width-4, self.height-4), rad=40, fill=255)
-        self.mask = ImageOps.invert(self.mask)
-        image.paste(self.mask, mask=self.mask)
+        mask = Image.new('L', (self.width, self.height), 0)
+        draw = ImageDraw.Draw(mask)
+        self.rounded_rectangle(draw, (4, 4, self.width-4, self.height-4), rad=40, fill=255)
+        mask = ImageOps.invert(mask)
+        image.paste(mask, mask=mask)
 
     def blur_edges(self, image):
 
-        self.mask = Image.new('L', (self.width, self.height), 0)
-        self.draw = ImageDraw.Draw(self.mask)
-        self.rounded_rectangle(self.draw, (7, 7, self.width-7, self.height-7), rad=40, fill=255)
-        self.mask = ImageOps.invert(self.mask)
+        mask = Image.new('L', (self.width, self.height), 0)
+        draw = ImageDraw.Draw(mask)
+        self.rounded_rectangle(draw, (7, 7, self.width-7, self.height-7), rad=40, fill=255)
+        mask = ImageOps.invert(mask)
         image2 = image.filter(ImageFilter.GaussianBlur(radius=2))
-        image.paste(image2, mask=self.mask)
+        image.paste(image2, mask=mask)
+
+    def draw_text_with_outline(self, image, pos, text, font):
+        
+        textX, textY = pos
+        draw = ImageDraw.Draw(image)
+
+        draw.text((textX-1, textY-1), text,(0,0,0),font=font)
+        draw.text((textX+1, textY-1), text,(0,0,0),font=font)
+        draw.text((textX+1, textY+1), text,(0,0,0),font=font)
+        draw.text((textX-1, textY+1), text,(0,0,0),font=font)
+        draw.text((textX, textY), text, (255,255,255), font=font)
+
+    def add_text(self, image):
+ 
+        map_name_str = f"{self.map.artist} - {self.map.title}"
+        mapper_str = f"Mapper: {self.map.mapper}"
+        diff_str = f"Difficulty: {self.map.diff_name}"
+
+        vertical_start = ((self.width - self.mod_image.size[0]) // 12) + self.mod_image.size[0]
+        vertical_center =((self.width - vertical_start) // 2) + vertical_start
+
+        self.draw_text_with_outline(image, (1.5*self.mod_image.size[0],20), map_name_str, font=self.font)
 
     def load_mod(self):
 
@@ -130,6 +154,8 @@ class Button:
         self.add_mask(temp_image)
         self.blur_edges(temp_image)
         self.add_mod(temp_image)
+        self.add_text(temp_image)
+
         self.show_image = ImageTk.PhotoImage(temp_image)
 
         self.clickable.configure(image=self.show_image)

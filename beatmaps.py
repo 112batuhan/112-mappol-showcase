@@ -11,7 +11,7 @@ class Beatmap:
         folder_dir = Path("backgrounds")
         folder_dir.mkdir(exist_ok=True)
 
-        api = "PUT API HERE"
+        api = "3c76fadf34e0b07eff6515607793606c83f334fa"
         url = f"https://osu.ppy.sh/api/get_beatmaps?k={api}&b={self.id}"
 
         r = requests.get(url)
