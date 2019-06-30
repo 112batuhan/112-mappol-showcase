@@ -17,24 +17,24 @@ class Button:
 
         self.map = map
         self.mod = mod
-        self.mod_color_dict = {"No Mod": (105, 105, 105),
-                               "Hidden": (252, 213, 98),
-                               "Hard Rock": (226, 113, 113),
-                               "Double Time": (143, 116, 212),
-                               "Free Mod": (135, 212, 102),
-                               "Tie Breaker": (255, 133, 11)}
+        self.mod_color_dict = {"No Mod": (217,217,217),
+                               "Hidden": (255,229,153),
+                               "Hard Rock": (234,153,153),
+                               "Double Time": (180,167,214),
+                               "Free Mod": (182,215,168),
+                               "Tie Breaker": (241,194,50)}
 
-        self.mod_hex_dict = {"No Mod": '#696969',
-                             "Hidden": '#fcd562',
-                             "Hard Rock": '#e27171',
-                             "Double Time": '#8f74d4',
-                             "Free Mod": '#87d466',
-                             "Tie Breaker": '#ff850b'}
+        self.mod_hex_dict = {"No Mod": '#d9d9d9',
+                             "Hidden": '#ffe599',
+                             "Hard Rock": '#ea9999',
+                             "Double Time": '#b4a7d6',
+                             "Free Mod": '#b6d7a8',
+                             "Tie Breaker": '#f1c232'}
 
         self.location = location
 
         self.image = Image.open(self.map.image_path)
-        self.font = ImageFont.truetype("arial.ttf", size=22)
+        self.font = ImageFont.truetype("Bebas-Regular.ttf", size=22)
 
         self.width = width
         self.height = int(self.image.size[1] * width / self.image.size[0])
@@ -111,10 +111,10 @@ class Button:
         text_x, text_y = pos
         draw = ImageDraw.Draw(image)
 
-        draw.text((text_x - 1, text_y - 1), text, (0, 0, 0), font=font)
-        draw.text((text_x + 1, text_y - 1), text, (0, 0, 0), font=font)
-        draw.text((text_x + 1, text_y + 1), text, (0, 0, 0), font=font)
-        draw.text((text_x - 1, text_y + 1), text, (0, 0, 0), font=font)
+        draw.text((text_x - 0.5, text_y - 0.5), text, (0, 0, 0), font=font)
+        draw.text((text_x + 0.5, text_y - 0.5), text, (0, 0, 0), font=font)
+        draw.text((text_x + 0.5, text_y + 0.5), text, (0, 0, 0), font=font)
+        draw.text((text_x - 0.5, text_y + 0.5), text, (0, 0, 0), font=font)
         draw.text((text_x, text_y), text, color, font=font)
 
     def draw_multiple_line_text(self, image, text, font, text_color, mid_height):
@@ -174,32 +174,28 @@ class Button:
 
         if self.state == 0:
             # change from normal to black for bans
-            temp_image = RGBTransform().mix_with((0, 0, 0), factor=0.5).applied_to(self.image)
-            color = (100,100,100)
+            temp_image = RGBTransform().mix_with((0, 0, 0), factor=0.8).applied_to(self.image)
             self.state += 1
 
         elif self.state == 1:
             # change from black to red for pick
-            temp_image = RGBTransform().mix_with((255, 0, 0), factor=0.3).applied_to(self.image)
-            color = (245, 66, 72)
+            temp_image = RGBTransform().mix_with((226,54,48), factor=0.6).applied_to(self.image)
             self.state += 1
 
         elif self.state == 2:
             # change from red to blue for pick
-            temp_image = RGBTransform().mix_with((0, 0, 255), factor=0.2).applied_to(self.image)
-            color = (66, 135, 245)
+            temp_image = RGBTransform().mix_with((12,0,255), factor=0.6).applied_to(self.image)
             self.state += 1
 
         elif self.state == 3:
             # change from blue to normal for reset
             temp_image = self.image
-            color = (255, 255, 255)
             self.state = 0
 
         self.add_mask(temp_image)
         self.blur_edges(temp_image)
         self.add_mod(temp_image)
-        self.add_text(temp_image, color)
+        self.add_text(temp_image, (255,255,255))
 
         self.show_image = ImageTk.PhotoImage(temp_image)
 
@@ -213,55 +209,55 @@ top.geometry("1420x530")
 top.configure(bg="white")
 cover_size = 300
 
-nomod_color = 105
+nomod_color = 217
 nomod_arr = np.ones((540, 350)) * nomod_color
 nm_img = ImageTk.PhotoImage(image=Image.fromarray(nomod_arr))
-nomod_label = tk.Label(top, image=nm_img, bg='#696969')
+nomod_label = tk.Label(top, image=nm_img, bg='#d9d9d9')
 nomod_label.place(anchor="nw", x=0)
 
-hd_color = (252, 213, 98)
+hd_color = (255,229,153)
 hd_arr = np.zeros((530, 350, 3), 'uint8')
-hd_arr[..., 0] = 252
-hd_arr[..., 1] = 213
-hd_arr[..., 2] = 98
+hd_arr[..., 0] = hd_color[0]
+hd_arr[..., 1] = hd_color[1]
+hd_arr[..., 2] = hd_color[2]
 hd_img = ImageTk.PhotoImage(image=Image.fromarray(hd_arr, mode='RGB'))
-hd_label = tk.Label(top, image=hd_img, bg='#fcd562')
+hd_label = tk.Label(top, image=hd_img, bg='#ffe599')
 hd_label.place(anchor="nw", x=350)
 
-hr_color = (226, 113, 113)
+hr_color = (234,153,153)
 hr_arr = np.zeros((530, 350, 3), 'uint8')
-hr_arr[..., 0] = 226
-hr_arr[..., 1] = 113
-hr_arr[..., 2] = 113
+hr_arr[..., 0] = hr_color[0]
+hr_arr[..., 1] = hr_color[1]
+hr_arr[..., 2] = hr_color[2]
 hr_img = ImageTk.PhotoImage(image=Image.fromarray(hr_arr, mode='RGB'))
-hr_label = tk.Label(top, image=hr_img, bg='#e27171')
+hr_label = tk.Label(top, image=hr_img, bg='#ea9999')
 hr_label.place(anchor="nw", y=270, x=350)
 
-dt_color = (143, 116, 212)
+dt_color = (180,167,214)
 dt_arr = np.zeros((530, 350, 3), 'uint8')
-dt_arr[..., 0] = 143
-dt_arr[..., 1] = 116
-dt_arr[..., 2] = 212
+dt_arr[..., 0] = dt_color[0]
+dt_arr[..., 1] = dt_color[1]
+dt_arr[..., 2] = dt_color[2]
 dt_img = ImageTk.PhotoImage(image=Image.fromarray(dt_arr, mode='RGB'))
-dt_label = tk.Label(top, image=dt_img, bg='#8f74d4')
+dt_label = tk.Label(top, image=dt_img, bg='#b4a7d6')
 dt_label.place(anchor="nw", x=700)
 
-fm_color = (135, 212, 102)
+fm_color = (182,215,168)
 fm_arr = np.zeros((530, 350, 3), 'uint8')
-fm_arr[..., 0] = 135
-fm_arr[..., 1] = 212
-fm_arr[..., 2] = 102
+fm_arr[..., 0] = fm_color[0]
+fm_arr[..., 1] = fm_color[1]
+fm_arr[..., 2] = fm_color[2]
 fm_img = ImageTk.PhotoImage(image=Image.fromarray(fm_arr, mode='RGB'))
-fm_label = tk.Label(top, image=fm_img, bg='#87d466')
+fm_label = tk.Label(top, image=fm_img, bg='#b6d7a8')
 fm_label.place(anchor="nw", y=270, x=700)
 
-tb_color = (255, 133, 11)
+tb_color = (241,194,50)
 tb_arr = np.zeros((530, 450, 3), 'uint8')
-tb_arr[..., 0] = 255
-tb_arr[..., 1] = 133
-tb_arr[..., 2] = 11
+tb_arr[..., 0] = tb_color[0]
+tb_arr[..., 1] = tb_color[1]
+tb_arr[..., 2] = tb_color[2]
 tb_img = ImageTk.PhotoImage(image=Image.fromarray(tb_arr, mode='RGB'))
-tb_label = tk.Label(top, image=tb_img, bg='#ff850b')
+tb_label = tk.Label(top, image=tb_img, bg='#f1c232')
 tb_label.place(anchor="nw", y=0, x=1050)
 
 buttonNo = 0
