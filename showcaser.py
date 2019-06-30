@@ -107,24 +107,21 @@ class Button:
 
     def draw_text_with_outline(self, image, pos, text, font):
 
-        textX, textY = pos
+        text_x, text_y = pos
         draw = ImageDraw.Draw(image)
 
-        draw.text((textX - 1, textY - 1), text, (0, 0, 0), font=font)
-        draw.text((textX + 1, textY - 1), text, (0, 0, 0), font=font)
-        draw.text((textX + 1, textY + 1), text, (0, 0, 0), font=font)
-        draw.text((textX - 1, textY + 1), text, (0, 0, 0), font=font)
-        draw.text((textX, textY), text, (255, 255, 255), font=font)
+        draw.text((text_x - 1, text_y - 1), text, (0, 0, 0), font=font)
+        draw.text((text_x + 1, text_y - 1), text, (0, 0, 0), font=font)
+        draw.text((text_x + 1, text_y + 1), text, (0, 0, 0), font=font)
+        draw.text((text_x - 1, text_y + 1), text, (0, 0, 0), font=font)
+        draw.text((text_x, text_y), text, (255, 255, 255), font=font)
 
     def add_text(self, image):
 
-        # map_name_str = f"{self.map.artist} - {self.map.title}"
+        # map artist -> {self.map.artist}, map title -> {self.map.title}
         map_name_str = f"{self.map.title}"
         mapper_str = f"Mapper: {self.map.mapper}"
         diff_str = f"Difficulty: {self.map.diff_name}"
-
-        # vertical_start = ((self.width - self.mod_image.size[0]) // 12) + self.mod_image.size[0]
-        # vertical_center =((self.width - vertical_start) // 2) + vertical_start
 
         self.draw_text_with_outline(image, (1.5 * self.mod_image.size[0] - 10, 1.5 * self.mod_image.size[1] / 2),
                                     map_name_str, font=self.font)
