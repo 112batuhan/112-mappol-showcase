@@ -16,17 +16,24 @@ class Button:
 
         self.map = map
         self.mod = mod
-        self.mod_color_dict = {"No Mod"      : (105,105,105),
-                               "Hidden"      : (252,213,98),
-                               "Hard Rock"   : (226,113,113),
-                               "Double Time" : (143,116,212),
-                               "Free Mod"    : (135,212,102),
-                               "Tie Breaker" : (255,133,11)}       
+        self.mod_color_dict = {"No Mod": (105, 105, 105),
+                               "Hidden": (252, 213, 98),
+                               "Hard Rock": (226, 113, 113),
+                               "Double Time": (143, 116, 212),
+                               "Free Mod": (135, 212, 102),
+                               "Tie Breaker": (255, 133, 11)}
+
+        self.mod_hex_dict = {"No Mod": '#696969',
+                             "Hidden": '#fcd562',
+                             "Hard Rock": '#e27171',
+                             "Double Time": '#8f74d4',
+                             "Free Mod": '#87d466',
+                             "Tie Breaker": '#ff850b'}
 
         self.location = location
 
         self.image = Image.open(self.map.image_path)
-        self.font = ImageFont.truetype("arial.ttf", size = 22)
+        self.font = ImageFont.truetype("arial.ttf", size=22)
 
         self.width = width
         self.height = int(self.image.size[1] * width / self.image.size[0])
@@ -37,7 +44,7 @@ class Button:
         self.show_image = ImageTk.PhotoImage(self.image)
 
         self.mod_image = self.load_mod()
-        self.mod_image = self.resize_image(self.mod_image, width//3)
+        self.mod_image = self.resize_image(self.mod_image, width // 3)
         self.add_mod(self.image)
         self.add_text(self.image)
 
@@ -45,10 +52,12 @@ class Button:
 
         self.state = 0
 
-        self.clickable = tk.Button(self.window, bd=0, image=self.show_image, command=self.change_color, borderwidth=0,
-                                   highlightthickness=0)
+        self.button_color = self.mod_hex_dict[self.mod]
+        self.clickable = tk.Button(self.window, bd=0, image=self.show_image, command=self.change_color,
+                                   highlightthickness=0, bg=self.button_color, fg=self.button_color,
+                                   activebackground=self.button_color)
         self.clickable.place(x=padx, y=pady, relx=self.location[0], rely=self.location[1], anchor="nw")
-        #self.clickable.grid(row=self.location[0], column=self.location[1], padx=padx, pady=pady)
+        # self.clickable.grid(row=self.location[0], column=self.location[1], padx=padx, pady=pady)
 
     def resize_image(self, image, width):
 
@@ -75,49 +84,50 @@ class Button:
         # Rounded Rectangular Mask
         mask = Image.new('L', (self.width, self.height), 0)
         draw = ImageDraw.Draw(mask)
-        self.rounded_rectangle(draw, (4, 4, self.width-4, self.height-4), rad=40, fill=255)
+        self.rounded_rectangle(draw, (4, 4, self.width - 4, self.height - 4), rad=40, fill=255)
         mask = ImageOps.invert(mask)
 
         fill_color = self.mod_color_dict[self.mod]
-        fill_array = np.zeros((self.height, self.width, 3))
+        fill_array = np.zeros((self.height, self.width, 3), dtype=np.uint8)
         fill_array[..., 0] = fill_color[0]
         fill_array[..., 1] = fill_color[1]
         fill_array[..., 2] = fill_color[2]
         fill_img = Image.fromarray(fill_array, mode='RGB')
-        
+
         image.paste(fill_img, mask=mask)
 
     def blur_edges(self, image):
 
         mask = Image.new('L', (self.width, self.height), 0)
         draw = ImageDraw.Draw(mask)
-        self.rounded_rectangle(draw, (7, 7, self.width-7, self.height-7), rad=40, fill=255)
+        self.rounded_rectangle(draw, (7, 7, self.width - 7, self.height - 7), rad=40, fill=255)
         mask = ImageOps.invert(mask)
         image2 = image.filter(ImageFilter.GaussianBlur(radius=2))
         image.paste(image2, mask=mask)
 
     def draw_text_with_outline(self, image, pos, text, font):
-        
+
         textX, textY = pos
         draw = ImageDraw.Draw(image)
 
-        draw.text((textX-1, textY-1), text,(0,0,0),font=font)
-        draw.text((textX+1, textY-1), text,(0,0,0),font=font)
-        draw.text((textX+1, textY+1), text,(0,0,0),font=font)
-        draw.text((textX-1, textY+1), text,(0,0,0),font=font)
-        draw.text((textX, textY), text, (255,255,255), font=font)
+        draw.text((textX - 1, textY - 1), text, (0, 0, 0), font=font)
+        draw.text((textX + 1, textY - 1), text, (0, 0, 0), font=font)
+        draw.text((textX + 1, textY + 1), text, (0, 0, 0), font=font)
+        draw.text((textX - 1, textY + 1), text, (0, 0, 0), font=font)
+        draw.text((textX, textY), text, (255, 255, 255), font=font)
 
     def add_text(self, image):
- 
-        #map_name_str = f"{self.map.artist} - {self.map.title}"
+
+        # map_name_str = f"{self.map.artist} - {self.map.title}"
         map_name_str = f"{self.map.title}"
         mapper_str = f"Mapper: {self.map.mapper}"
         diff_str = f"Difficulty: {self.map.diff_name}"
 
-        #vertical_start = ((self.width - self.mod_image.size[0]) // 12) + self.mod_image.size[0]
-        #vertical_center =((self.width - vertical_start) // 2) + vertical_start
+        # vertical_start = ((self.width - self.mod_image.size[0]) // 12) + self.mod_image.size[0]
+        # vertical_center =((self.width - vertical_start) // 2) + vertical_start
 
-        self.draw_text_with_outline(image, (1.5*self.mod_image.size[0]-10,1.5*self.mod_image.size[1]/2), map_name_str, font=self.font)
+        self.draw_text_with_outline(image, (1.5 * self.mod_image.size[0] - 10, 1.5 * self.mod_image.size[1] / 2),
+                                    map_name_str, font=self.font)
 
     def load_mod(self):
 
@@ -177,6 +187,7 @@ class Button:
         self.clickable.configure(image=self.show_image)
         self.clickable.image = self.show_image
 
+
 top = tk.Tk()
 
 top.geometry("1420x530")
@@ -184,74 +195,83 @@ top.configure(bg="white")
 cover_size = 300
 
 nomod_color = 105
-nomod_arr = np.ones((540,350))*nomod_color
-nm_img =  ImageTk.PhotoImage(image=Image.fromarray(nomod_arr))
+nomod_arr = np.ones((540, 350)) * nomod_color
+nm_img = ImageTk.PhotoImage(image=Image.fromarray(nomod_arr))
 nomod_label = tk.Label(top, image=nm_img)
-nomod_label.place(anchor="nw",x=0)
+nomod_label.place(anchor="nw", x=0)
 
-hd_color = (252,213,98)
-hd_arr = np.zeros((530,350,3), 'uint8')
+hd_color = (252, 213, 98)
+hd_arr = np.zeros((530, 350, 3), 'uint8')
 hd_arr[..., 0] = 252
 hd_arr[..., 1] = 213
 hd_arr[..., 2] = 98
-hd_img =  ImageTk.PhotoImage(image=Image.fromarray(hd_arr,mode='RGB'))
+hd_img = ImageTk.PhotoImage(image=Image.fromarray(hd_arr, mode='RGB'))
 hd_label = tk.Label(top, image=hd_img)
-hd_label.place(anchor="nw",x=350)
+hd_label.place(anchor="nw", x=350)
 
-hr_color = (226,113,113)
-hr_arr = np.zeros((530,350,3), 'uint8')
+hr_color = (226, 113, 113)
+hr_arr = np.zeros((530, 350, 3), 'uint8')
 hr_arr[..., 0] = 226
 hr_arr[..., 1] = 113
 hr_arr[..., 2] = 113
-hr_img =  ImageTk.PhotoImage(image=Image.fromarray(hr_arr,mode='RGB'))
+hr_img = ImageTk.PhotoImage(image=Image.fromarray(hr_arr, mode='RGB'))
 hr_label = tk.Label(top, image=hr_img)
-hr_label.place(anchor="nw",y=270,x=350)
+hr_label.place(anchor="nw", y=270, x=350)
 
-dt_color = (143,116,212)
-dt_arr = np.zeros((530,350,3), 'uint8')
+dt_color = (143, 116, 212)
+dt_arr = np.zeros((530, 350, 3), 'uint8')
 dt_arr[..., 0] = 143
 dt_arr[..., 1] = 116
 dt_arr[..., 2] = 212
-dt_img =  ImageTk.PhotoImage(image=Image.fromarray(dt_arr,mode='RGB'))
+dt_img = ImageTk.PhotoImage(image=Image.fromarray(dt_arr, mode='RGB'))
 dt_label = tk.Label(top, image=dt_img)
-dt_label.place(anchor="nw",x=700)
+dt_label.place(anchor="nw", x=700)
 
-fm_color = (135,212,102)
-fm_arr = np.zeros((530,350,3), 'uint8')
+fm_color = (135, 212, 102)
+fm_arr = np.zeros((530, 350, 3), 'uint8')
 fm_arr[..., 0] = 135
 fm_arr[..., 1] = 212
 fm_arr[..., 2] = 102
-fm_img =  ImageTk.PhotoImage(image=Image.fromarray(fm_arr,mode='RGB'))
+fm_img = ImageTk.PhotoImage(image=Image.fromarray(fm_arr, mode='RGB'))
 fm_label = tk.Label(top, image=fm_img)
-fm_label.place(anchor="nw",y=270,x=700)
+fm_label.place(anchor="nw", y=270, x=700)
+
+tb_color = (255, 133, 11)
+tb_arr = np.zeros((530, 450, 3), 'uint8')
+tb_arr[..., 0] = 255
+tb_arr[..., 1] = 133
+tb_arr[..., 2] = 11
+tb_img = ImageTk.PhotoImage(image=Image.fromarray(tb_arr, mode='RGB'))
+tb_label = tk.Label(top, image=tb_img)
+tb_label.place(anchor="nw", y=0, x=1050)
 
 buttonNo = 0
 
 for mod, maps in get_pool().items():
 
     if mod == "No Mod":
-        for no,map in enumerate(maps):
+        for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, no/6), cover_size,25,42)
+            Button(top, map, mod, (0, no / 6), cover_size, 25, 42)
     elif mod == "Hidden":
-        for no,map in enumerate(maps):
+        for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, no/6), cover_size,375,10)
+            Button(top, map, mod, (0, no / 6), cover_size, 375, 5)
     elif mod == "Hard Rock":
-        for no,map in enumerate(maps):
+        for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, (no+3)/6), cover_size,375,10)
-    elif mod == "Double Time" :
-        for no,map in enumerate(maps):
+            Button(top, map, mod, (0, (no + 3) / 6), cover_size, 375, 10)
+    elif mod == "Double Time":
+        for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, no/6), cover_size,725,10)
+            Button(top, map, mod, (0, no / 6), cover_size, 725, 5)
     elif mod == "Free Mod":
-        for no,map in enumerate(maps):
+        for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, (no+3)/6), cover_size,725,10)
+            Button(top, map, mod, (0, (no + 3) / 6), cover_size, 725, 10)
     else:
-        for no,map in enumerate(maps):
+        for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, (no+2/6)), cover_size,1075,42) 
+            Button(top, map, mod, (0, (no + 2 / 6)), cover_size, 1075, 42)
 
 top.mainloop()
