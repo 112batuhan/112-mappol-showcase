@@ -10,17 +10,23 @@ from beatmaps import get_pool, Beatmap
 
 class Button:
 
-    def __init__(self, window, map, mod, location=(0, 0), width=900):
+    def __init__(self, window, map, mod, location=(0, 0), width=900, padx=0, pady=0):
 
         self.window = window
 
         self.map = map
         self.mod = mod
+        self.mod_color_dict = {"No Mod"      : (105,105,105),
+                               "Hidden"      : (252,213,98),
+                               "Hard Rock"   : (226,113,113),
+                               "Double Time" : (143,116,212),
+                               "Free Mod"    : (135,212,102),
+                               "Tie Breaker" : (255,133,11)}       
 
         self.location = location
 
         self.image = Image.open(self.map.image_path)
-        self.font = ImageFont.truetype("arial.ttf", size = 15)
+        self.font = ImageFont.truetype("arial.ttf", size = 22)
 
         self.width = width
         self.height = int(self.image.size[1] * width / self.image.size[0])
@@ -41,7 +47,8 @@ class Button:
 
         self.clickable = tk.Button(self.window, bd=0, image=self.show_image, command=self.change_color, borderwidth=0,
                                    highlightthickness=0)
-        self.clickable.grid(row=self.location[0], column=self.location[1])
+        self.clickable.place(x=padx, y=pady, relx=self.location[0], rely=self.location[1], anchor="nw")
+        #self.clickable.grid(row=self.location[0], column=self.location[1], padx=padx, pady=pady)
 
     def resize_image(self, image, width):
 
@@ -70,7 +77,15 @@ class Button:
         draw = ImageDraw.Draw(mask)
         self.rounded_rectangle(draw, (4, 4, self.width-4, self.height-4), rad=40, fill=255)
         mask = ImageOps.invert(mask)
-        image.paste(mask, mask=mask)
+
+        fill_color = self.mod_color_dict[self.mod]
+        fill_array = np.zeros((self.height, self.width, 3))
+        fill_array[..., 0] = fill_color[0]
+        fill_array[..., 1] = fill_color[1]
+        fill_array[..., 2] = fill_color[2]
+        fill_img = Image.fromarray(fill_array, mode='RGB')
+        
+        image.paste(fill_img, mask=mask)
 
     def blur_edges(self, image):
 
@@ -94,31 +109,32 @@ class Button:
 
     def add_text(self, image):
  
-        map_name_str = f"{self.map.artist} - {self.map.title}"
+        #map_name_str = f"{self.map.artist} - {self.map.title}"
+        map_name_str = f"{self.map.title}"
         mapper_str = f"Mapper: {self.map.mapper}"
         diff_str = f"Difficulty: {self.map.diff_name}"
 
-        vertical_start = ((self.width - self.mod_image.size[0]) // 12) + self.mod_image.size[0]
-        vertical_center =((self.width - vertical_start) // 2) + vertical_start
+        #vertical_start = ((self.width - self.mod_image.size[0]) // 12) + self.mod_image.size[0]
+        #vertical_center =((self.width - vertical_start) // 2) + vertical_start
 
-        self.draw_text_with_outline(image, (1.5*self.mod_image.size[0],20), map_name_str, font=self.font)
+        self.draw_text_with_outline(image, (1.5*self.mod_image.size[0]-10,1.5*self.mod_image.size[1]/2), map_name_str, font=self.font)
 
     def load_mod(self):
 
         folder_dir = Path("mods")
 
         if self.mod == "No Mod":
-            image_name = "selection-mod-Nomod@2x"
+            image_name = "nomod"
         elif self.mod == "Hidden":
-            image_name = "selection-mod-hidden@2x"
+            image_name = "Hidden"
         elif self.mod == "Hard Rock":
-            image_name = "selection-mod-hardrock@2x"
+            image_name = "Hardrock"
         elif self.mod == "Double Time":
-            image_name = "selection-mod-doubletime@2x"
+            image_name = "doubletime"
         elif self.mod == "Free Mod":
-            image_name = "selection-mode-Freemod@2x"
+            image_name = "freemod"
         elif self.mod == "Tie Breaker":
-            image_name = "selection-mode-Tiebreaker@2x"
+            image_name = "Tiebreaker"
 
         return Image.open(str(folder_dir / image_name) + ".png")
 
@@ -161,46 +177,81 @@ class Button:
         self.clickable.configure(image=self.show_image)
         self.clickable.image = self.show_image
 
-
-class Window:
-
-    def __init__(self, window_size=(1420, 530)):
-
-        self.pool = get_pool()
-        self.window_size = window_size
-
-        self.button_list = []
-
-    def parse_buttons(self, max_col=3, horizontal_space_ratio=0.2, vertical_space_ratio=0.2):
-
-        rows = []
-        for mod, maps in self.pool.items():
-
-            row_count = int(len(maps) / max_col)
-
-            for row in range(row_count):
-                rows.append([mod, maps[row * max_col:(row + 1) * max_col]])
-
-            if len(maps) % max_col != 0 and row_count != 0:
-                rows.append([mod, maps[(row + 1) * max_col:]])
-
-            elif row_count == 0:
-                rows.append([mod, maps])
-
-
 top = tk.Tk()
 
 top.geometry("1420x530")
 top.configure(bg="white")
 cover_size = 300
 
+nomod_color = 105
+nomod_arr = np.ones((540,350))*nomod_color
+nm_img =  ImageTk.PhotoImage(image=Image.fromarray(nomod_arr))
+nomod_label = tk.Label(top, image=nm_img)
+nomod_label.place(anchor="nw",x=0)
+
+hd_color = (252,213,98)
+hd_arr = np.zeros((530,350,3), 'uint8')
+hd_arr[..., 0] = 252
+hd_arr[..., 1] = 213
+hd_arr[..., 2] = 98
+hd_img =  ImageTk.PhotoImage(image=Image.fromarray(hd_arr,mode='RGB'))
+hd_label = tk.Label(top, image=hd_img)
+hd_label.place(anchor="nw",x=350)
+
+hr_color = (226,113,113)
+hr_arr = np.zeros((530,350,3), 'uint8')
+hr_arr[..., 0] = 226
+hr_arr[..., 1] = 113
+hr_arr[..., 2] = 113
+hr_img =  ImageTk.PhotoImage(image=Image.fromarray(hr_arr,mode='RGB'))
+hr_label = tk.Label(top, image=hr_img)
+hr_label.place(anchor="nw",y=270,x=350)
+
+dt_color = (143,116,212)
+dt_arr = np.zeros((530,350,3), 'uint8')
+dt_arr[..., 0] = 143
+dt_arr[..., 1] = 116
+dt_arr[..., 2] = 212
+dt_img =  ImageTk.PhotoImage(image=Image.fromarray(dt_arr,mode='RGB'))
+dt_label = tk.Label(top, image=dt_img)
+dt_label.place(anchor="nw",x=700)
+
+fm_color = (135,212,102)
+fm_arr = np.zeros((530,350,3), 'uint8')
+fm_arr[..., 0] = 135
+fm_arr[..., 1] = 212
+fm_arr[..., 2] = 102
+fm_img =  ImageTk.PhotoImage(image=Image.fromarray(fm_arr,mode='RGB'))
+fm_label = tk.Label(top, image=fm_img)
+fm_label.place(anchor="nw",y=270,x=700)
+
 buttonNo = 0
+
 for mod, maps in get_pool().items():
 
-    for map in maps:
-        map = Beatmap(map)
-
-        Button(top, map, mod, (buttonNo % 5, math.floor(buttonNo / 5)), cover_size)
-        buttonNo += 1
+    if mod == "No Mod":
+        for no,map in enumerate(maps):
+            map = Beatmap(map)
+            Button(top, map, mod, (0, no/6), cover_size,25,42)
+    elif mod == "Hidden":
+        for no,map in enumerate(maps):
+            map = Beatmap(map)
+            Button(top, map, mod, (0, no/6), cover_size,375,10)
+    elif mod == "Hard Rock":
+        for no,map in enumerate(maps):
+            map = Beatmap(map)
+            Button(top, map, mod, (0, (no+3)/6), cover_size,375,10)
+    elif mod == "Double Time" :
+        for no,map in enumerate(maps):
+            map = Beatmap(map)
+            Button(top, map, mod, (0, no/6), cover_size,725,10)
+    elif mod == "Free Mod":
+        for no,map in enumerate(maps):
+            map = Beatmap(map)
+            Button(top, map, mod, (0, (no+3)/6), cover_size,725,10)
+    else:
+        for no,map in enumerate(maps):
+            map = Beatmap(map)
+            Button(top, map, mod, (0, (no+2/6)), cover_size,1075,42) 
 
 top.mainloop()
