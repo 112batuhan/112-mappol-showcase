@@ -1,5 +1,6 @@
 import tkinter as tk
 from PIL import ImageTk, Image, ImageDraw, ImageOps, ImageFilter, ImageFont
+import textwrap
 import math
 import numpy as np
 from transforms import RGBTransform
@@ -33,7 +34,7 @@ class Button:
         self.location = location
 
         self.image = Image.open(self.map.image_path)
-        self.font = ImageFont.truetype("arial.ttf", size=22)
+        self.font = ImageFont.truetype("arial.ttf", size=18)
 
         self.width = width
         self.height = int(self.image.size[1] * width / self.image.size[0])
@@ -46,7 +47,7 @@ class Button:
         self.mod_image = self.load_mod()
         self.mod_image = self.resize_image(self.mod_image, width // 3)
         self.add_mod(self.image)
-        self.add_text(self.image)
+        self.add_text(self.image, (255,255,255))
 
         self.show_image = ImageTk.PhotoImage(self.image)
 
@@ -105,7 +106,7 @@ class Button:
         image2 = image.filter(ImageFilter.GaussianBlur(radius=2))
         image.paste(image2, mask=mask)
 
-    def draw_text_with_outline(self, image, pos, text, font):
+    def draw_text_with_outline(self, image, pos, text, font ,color = (225, 225, 225)):
 
         text_x, text_y = pos
         draw = ImageDraw.Draw(image)
@@ -114,17 +115,34 @@ class Button:
         draw.text((text_x + 1, text_y - 1), text, (0, 0, 0), font=font)
         draw.text((text_x + 1, text_y + 1), text, (0, 0, 0), font=font)
         draw.text((text_x - 1, text_y + 1), text, (0, 0, 0), font=font)
-        draw.text((text_x, text_y), text, (255, 255, 255), font=font)
+        draw.text((text_x, text_y), text, color, font=font)
 
-    def add_text(self, image):
+    def draw_multiple_line_text(self, image, text, font, text_color, mid_height):
+
+        draw = ImageDraw.Draw(image)
+        image_width, image_height = image.size
+        y_text = 0
+        lines = textwrap.wrap(text, width=22)
+        for line in lines:
+            line_width, line_height = font.getsize(line)
+            y_text += line_height
+
+        y_text_2 = 0
+        for line in lines:
+            line_width, line_height = font.getsize(line)
+            self.draw_text_with_outline(image, (1.5 * self.mod_image.size[0] - 10, mid_height - (y_text/2) + y_text_2 + (line_height/2)),
+                                    line, self.font, text_color)
+            y_text_2 += line_height
+
+
+    def add_text(self, image, color):
 
         # map artist -> {self.map.artist}, map title -> {self.map.title}
         map_name_str = f"{self.map.title}"
         mapper_str = f"Mapper: {self.map.mapper}"
         diff_str = f"Difficulty: {self.map.diff_name}"
 
-        self.draw_text_with_outline(image, (1.5 * self.mod_image.size[0] - 10, 1.5 * self.mod_image.size[1] / 2),
-                                    map_name_str, font=self.font)
+        self.draw_multiple_line_text(image, map_name_str, self.font, color, 1.5 * self.mod_image.size[1] / 2)
 
     def load_mod(self):
 
@@ -156,28 +174,32 @@ class Button:
 
         if self.state == 0:
             # change from normal to black for bans
-            temp_image = RGBTransform().mix_with((0, 0, 0), factor=0.6).applied_to(self.image)
+            temp_image = RGBTransform().mix_with((0, 0, 0), factor=0.5).applied_to(self.image)
+            color = (100,100,100)
             self.state += 1
 
         elif self.state == 1:
             # change from black to red for pick
-            temp_image = RGBTransform().mix_with((255, 0, 0), factor=0.4).applied_to(self.image)
+            temp_image = RGBTransform().mix_with((255, 0, 0), factor=0.3).applied_to(self.image)
+            color = (245, 66, 72)
             self.state += 1
 
         elif self.state == 2:
             # change from red to blue for pick
-            temp_image = RGBTransform().mix_with((0, 0, 255), factor=0.3).applied_to(self.image)
+            temp_image = RGBTransform().mix_with((0, 0, 255), factor=0.2).applied_to(self.image)
+            color = (66, 135, 245)
             self.state += 1
 
         elif self.state == 3:
             # change from blue to normal for reset
             temp_image = self.image
+            color = (255, 255, 255)
             self.state = 0
 
         self.add_mask(temp_image)
         self.blur_edges(temp_image)
         self.add_mod(temp_image)
-        self.add_text(temp_image)
+        self.add_text(temp_image, color)
 
         self.show_image = ImageTk.PhotoImage(temp_image)
 
