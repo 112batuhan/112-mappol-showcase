@@ -34,7 +34,7 @@ class Button:
         self.location = location
 
         self.image = Image.open(self.map.image_path)
-        self.font = ImageFont.truetype("arial.ttf", size=18)
+        self.font = ImageFont.truetype("arial.ttf", size=22)
 
         self.width = width
         self.height = int(self.image.size[1] * width / self.image.size[0])
@@ -122,7 +122,7 @@ class Button:
         draw = ImageDraw.Draw(image)
         image_width, image_height = image.size
         y_text = 0
-        lines = textwrap.wrap(text, width=22)
+        lines = textwrap.wrap(text, width=20)
         for line in lines:
             line_width, line_height = font.getsize(line)
             y_text += line_height
@@ -216,7 +216,7 @@ cover_size = 300
 nomod_color = 105
 nomod_arr = np.ones((540, 350)) * nomod_color
 nm_img = ImageTk.PhotoImage(image=Image.fromarray(nomod_arr))
-nomod_label = tk.Label(top, image=nm_img)
+nomod_label = tk.Label(top, image=nm_img, bg='#696969')
 nomod_label.place(anchor="nw", x=0)
 
 hd_color = (252, 213, 98)
@@ -225,7 +225,7 @@ hd_arr[..., 0] = 252
 hd_arr[..., 1] = 213
 hd_arr[..., 2] = 98
 hd_img = ImageTk.PhotoImage(image=Image.fromarray(hd_arr, mode='RGB'))
-hd_label = tk.Label(top, image=hd_img)
+hd_label = tk.Label(top, image=hd_img, bg='#fcd562')
 hd_label.place(anchor="nw", x=350)
 
 hr_color = (226, 113, 113)
@@ -234,7 +234,7 @@ hr_arr[..., 0] = 226
 hr_arr[..., 1] = 113
 hr_arr[..., 2] = 113
 hr_img = ImageTk.PhotoImage(image=Image.fromarray(hr_arr, mode='RGB'))
-hr_label = tk.Label(top, image=hr_img)
+hr_label = tk.Label(top, image=hr_img, bg='#e27171')
 hr_label.place(anchor="nw", y=270, x=350)
 
 dt_color = (143, 116, 212)
@@ -243,7 +243,7 @@ dt_arr[..., 0] = 143
 dt_arr[..., 1] = 116
 dt_arr[..., 2] = 212
 dt_img = ImageTk.PhotoImage(image=Image.fromarray(dt_arr, mode='RGB'))
-dt_label = tk.Label(top, image=dt_img)
+dt_label = tk.Label(top, image=dt_img, bg='#8f74d4')
 dt_label.place(anchor="nw", x=700)
 
 fm_color = (135, 212, 102)
@@ -252,7 +252,7 @@ fm_arr[..., 0] = 135
 fm_arr[..., 1] = 212
 fm_arr[..., 2] = 102
 fm_img = ImageTk.PhotoImage(image=Image.fromarray(fm_arr, mode='RGB'))
-fm_label = tk.Label(top, image=fm_img)
+fm_label = tk.Label(top, image=fm_img, bg='#87d466')
 fm_label.place(anchor="nw", y=270, x=700)
 
 tb_color = (255, 133, 11)
@@ -261,7 +261,7 @@ tb_arr[..., 0] = 255
 tb_arr[..., 1] = 133
 tb_arr[..., 2] = 11
 tb_img = ImageTk.PhotoImage(image=Image.fromarray(tb_arr, mode='RGB'))
-tb_label = tk.Label(top, image=tb_img)
+tb_label = tk.Label(top, image=tb_img, bg='#ff850b')
 tb_label.place(anchor="nw", y=0, x=1050)
 
 buttonNo = 0
