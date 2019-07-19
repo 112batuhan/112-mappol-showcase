@@ -267,23 +267,23 @@ for mod, maps in get_pool().items():
     if mod == "No Mod":
         for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, no / 6), cover_size, 25, 42)
+            Button(top, map, mod, (0, no / (len(maps)+0.4)), cover_size, 25, 42)
     elif mod == "Hidden":
         for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, no / 6), cover_size, 375, 5)
+            Button(top, map, mod, (0, no / (len(maps)*2)), cover_size, 375, 15)
     elif mod == "Hard Rock":
         for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, (no + 3) / 6), cover_size, 375, 10)
+            Button(top, map, mod, (0, (no + len(maps)) / (len(maps)*2)), cover_size, 375, 20)
     elif mod == "Double Time":
         for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, no / 6), cover_size, 725, 5)
+            Button(top, map, mod, (0, no / (len(maps)*2)), cover_size, 725, 15)
     elif mod == "Free Mod":
         for no, map in enumerate(maps):
             map = Beatmap(map)
-            Button(top, map, mod, (0, (no + 3) / 6), cover_size, 725, 10)
+            Button(top, map, mod, (0, (no + len(maps)) / (len(maps)*2)), cover_size, 725, 20)
     else:
         for no, map in enumerate(maps):
             map = Beatmap(map)
